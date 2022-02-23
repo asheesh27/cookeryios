@@ -15,6 +15,12 @@ class ForgotPasswordViewController: UIViewController {
 
         // Do any additional setup after loading the view.
         emailTextInput.addBottomBorder()
+        configureTapGesture()
+    }
+    
+    private func configureTapGesture(){
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ViewController.handleTap))
+        view.addGestureRecognizer(tapGesture)
     }
     
     @IBAction func continueBtnClicked(_ sender: Any) {

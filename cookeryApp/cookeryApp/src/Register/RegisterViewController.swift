@@ -9,12 +9,15 @@ import UIKit
 
 class RegisterViewController: ViewController {
 
+    @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var firstNameInput: UITextField!
     @IBOutlet weak var lastNameInput: UITextField!
     @IBOutlet weak var emailIdInput: UITextField!
     @IBOutlet weak var genderInput: UITextField!
     @IBOutlet weak var passwordInput: UITextField!
     @IBOutlet weak var confirmPasswordInput: UITextField!
+    
+//    var activeTextField:UITextField!
     
     
     
@@ -29,7 +32,44 @@ class RegisterViewController: ViewController {
         self.genderInput.addBottomBorder()
         self.passwordInput.addBottomBorder()
         self.confirmPasswordInput.addBottomBorder()
+        configureTextFields()
+        configureTapGesture()
+        firstNameInput.becomeFirstResponder()
         
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardAppears(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardDisappears(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        
+    }
+    
+    var isExpand : Bool = false
+    @objc func keyboardAppears(notification:Notification){
+        if !isExpand {
+            self.scrollView.contentSize = CGSize(width: self.view.frame.width, height: self.scrollView.frame.height + 300)
+            isExpand = true
+        }
+        let info:NSDictionary = notification.userInfo! as NSDictionary
+        let keyboardSize = (info[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        let keyboardY = self.view.frame.height - keyboardSize.height
+        let editingTextFieldY = activeTextField.convert(activeTextField.bounds, to: self.view).minY
+        if self.view.frame.minY>=0{
+            
+            if editingTextFieldY>keyboardY-40{
+                UIView.animate(withDuration: 0.25, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
+                    self.view.frame = CGRect(x: 0, y: self.view.frame.origin.y - (editingTextFieldY-(keyboardY-100)), width: self.view.bounds.width, height: self.view.bounds.height)
+                }, completion: nil)
+            }
+        }
+    }
+   
+    @objc func keyboardDisappears(notification:Notification){
+        UIView.animate(withDuration: 0.25, delay: 0.0, options: UIView.AnimationOptions.curveEaseIn, animations: {
+            self.view.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
+        }, completion: nil)
+    }
+    
+    @IBAction func done(_ sender: UITextField) {
+        sender.resignFirstResponder()
     }
     
     @IBAction func ContinueBtn(_ sender: Any) {
@@ -87,17 +127,19 @@ class RegisterViewController: ViewController {
         }else{
             CommonUtility.showAlert(message: "Passwords mismatched", parentController: self)
         }
-        
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    private func configureTextFields(){
+        firstNameInput.delegate = self
+        lastNameInput.delegate = self
+        emailIdInput.delegate = self
+        genderInput.delegate = self
+        passwordInput.delegate = self
+        confirmPasswordInput.delegate = self
     }
-    */
 
+    private func configureTapGesture(){
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ViewController.handleTap))
+        view.addGestureRecognizer(tapGesture)
+    }
 }

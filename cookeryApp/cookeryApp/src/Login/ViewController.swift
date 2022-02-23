@@ -15,19 +15,39 @@ enum tfStyleType: Int {
 }
 
 class ViewController: UIViewController {
-    var requestModel : LoginRequestModel = LoginRequestModel.init(emailId: <#T##String#>, password: <#T##String#>)
+//    var requestModel : LoginRequestModel = LoginRequestModel.init(emailId: String, password: String)
     @IBOutlet weak var emailId: UITextField!
     @IBOutlet weak var passwordField: UITextField!
     @IBOutlet weak var registerBtn: UIButton!
     
     var emailTextInput:String = ""
     var passwordTextInput:String = ""
+    var activeTextField:UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         self.emailId?.addBottomBorder()
         self.passwordField?.addBottomBorder()
+        emailId?.becomeFirstResponder()
+        configureTextFields()
+        configureTapGesture()
+        
+    }
+    
+    private func configureTextFields(){
+        emailId?.delegate = self
+        passwordField?.delegate = self
+    }
+    
+    private func configureTapGesture(){
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ViewController.handleTap))
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc func handleTap(){
+        print("Handle tap was called")
+        view.endEditing(true)
     }
     
     @IBAction func loginClicked(_ sender: Any) {
@@ -35,7 +55,7 @@ class ViewController: UIViewController {
         guard let emailTextInput = emailId.text else{
             return
         }
-        requestModel.emailId = emailTextInput
+//        requestModel.emailId = emailTextInput
         guard let passwordTextInput = passwordField?.text else{
             return
         }
@@ -74,5 +94,38 @@ extension UITextField {
     }
 }
 
+extension ViewController:UITextFieldDelegate{
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let nextTag = textField.tag + 1
 
+        if let nextResponder = self.view.viewWithTag(nextTag) as? UITextField {
+               nextResponder.becomeFirstResponder()
+           } else {
+                   textField.resignFirstResponder()
+           }
+
+           return true
+    }
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        activeTextField = textField
+    }
+    func textFieldDidEndEditing(_ textField: UITextField) {
+      
+        print("Textfield ended editing ")
+    }
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        return true
+    }
+    func textFieldShouldClear(_ textField: UITextField) -> Bool {
+        return true
+    }
+    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
+        print("Ended editing")
+        return true
+    }
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        print("changing characters")
+        return true
+    }
+}
 
