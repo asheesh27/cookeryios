@@ -106,26 +106,33 @@ extension ViewController:UITextFieldDelegate{
 
            return true
     }
+    
     func textFieldDidBeginEditing(_ textField: UITextField) {
         activeTextField = textField
     }
+    
     func textFieldDidEndEditing(_ textField: UITextField) {
       
         print("Textfield ended editing ")
     }
+    
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         return true
     }
+    
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
         return true
     }
+    
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
         print("Ended editing")
         return true
     }
+    
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         print("changing characters")
         return true
     }
+    
 }
 

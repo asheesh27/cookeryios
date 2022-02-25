@@ -6,8 +6,9 @@
 //
 
 import UIKit
+import Alomafire
 
-class RegisterViewController: ViewController {
+class RegisterViewController: UIViewController {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var firstNameInput: UITextField!
@@ -18,29 +19,30 @@ class RegisterViewController: ViewController {
     @IBOutlet weak var confirmPasswordInput: UITextField!
     
 //    var activeTextField:UITextField!
-    
+    public var currentUser : LoginRequestModel?
+    var activeTextField: UITextField?
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+       currentUser = LoginRequestModel()
         // Do any additional setup after loading the view.
         self.title = "Register"
-        self.firstNameInput.addBottomBorder()
-        self.lastNameInput.addBottomBorder()
-        self.emailIdInput.addBottomBorder()
-        self.genderInput.addBottomBorder()
-        self.passwordInput.addBottomBorder()
-        self.confirmPasswordInput.addBottomBorder()
+        self.firstNameInput?.addBottomBorder()
+        self.lastNameInput?.addBottomBorder()
+        self.emailIdInput?.addBottomBorder()
+        self.genderInput?.addBottomBorder()
+        self.passwordInput?.addBottomBorder()
+        self.confirmPasswordInput?.addBottomBorder()
         configureTextFields()
         configureTapGesture()
-        firstNameInput.becomeFirstResponder()
+        firstNameInput?.becomeFirstResponder()
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardAppears(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardDisappears(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
-    }
+        }
     
     var isExpand : Bool = false
     @objc func keyboardAppears(notification:Notification){
@@ -51,7 +53,8 @@ class RegisterViewController: ViewController {
         let info:NSDictionary = notification.userInfo! as NSDictionary
         let keyboardSize = (info[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         let keyboardY = self.view.frame.height - keyboardSize.height
-        let editingTextFieldY = activeTextField.convert(activeTextField.bounds, to: self.view).minY
+        guard let _tf = activeTextField else { return  }
+        let editingTextFieldY = _tf.convert(_tf.bounds, to: self.view).minY
         if self.view.frame.minY>=0{
             
             if editingTextFieldY>keyboardY-40{
@@ -92,6 +95,10 @@ class RegisterViewController: ViewController {
         guard let confirmPasswordTextInput = confirmPasswordInput.text else{
             return
         }
+        
+//        currentUser?.registrationValidation(userDetails: usersDetails)
+//        print("-----usersDetails------: \(usersDetails)")
+        
         //Checking firstname
         if fNTextInput.isEmpty{
             CommonUtility.showAlert(message: "First Name field should not be empty", parentController: self)
@@ -119,7 +126,7 @@ class RegisterViewController: ViewController {
         if passwordTextInput == confirmPasswordTextInput{
             let passwordIsValid = CommonUtility.isValidPassword(passwordTextInput)
             if (passwordIsValid.0){
-                print("valid")
+                print("passed")
             }else{
                 CommonUtility.showAlert(message: passwordIsValid.1, parentController: self)
             }
@@ -130,16 +137,78 @@ class RegisterViewController: ViewController {
     }
     
     private func configureTextFields(){
-        firstNameInput.delegate = self
-        lastNameInput.delegate = self
-        emailIdInput.delegate = self
-        genderInput.delegate = self
-        passwordInput.delegate = self
-        confirmPasswordInput.delegate = self
+        firstNameInput?.delegate = self
+        lastNameInput?.delegate = self
+        emailIdInput?.delegate = self
+        genderInput?.delegate = self
+        passwordInput?.delegate = self
+        confirmPasswordInput?.delegate = self
     }
 
     private func configureTapGesture(){
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ViewController.handleTap))
         view.addGestureRecognizer(tapGesture)
     }
+    
+    @objc func handleTap(){
+        print("Handle tap was called")
+        view.endEditing(true)
+    }
 }
+
+extension RegisterViewController:UITextFieldDelegate{
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let nextTag = textField.tag + 1
+
+        if let nextResponder = self.view.viewWithTag(nextTag) as? UITextField {
+               nextResponder.becomeFirstResponder()
+           } else {
+                   textField.resignFirstResponder()
+           }
+
+           return true
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        activeTextField = textField
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        switch textField.tag{
+        case 0:
+            currentUser?.firstName = (textField.text)!
+        case 1:
+            currentUser?.lastName = (textField.text)!
+        case 2:
+            currentUser?.emailId = (textField.text)!
+        case 3:
+            currentUser?.gender = (textField.text)!
+        case 4:
+            currentUser?.password = (textField.text)!
+        default:
+            print("Ended")
+        }
+    }
+    
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        return true
+    }
+    
+    func textFieldShouldClear(_ textField: UITextField) -> Bool {
+        return true
+    }
+    
+    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
+        print("Ended editing")
+        return true
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        print("adding characters")
+        return true
+    
+    }
+}
+    
+

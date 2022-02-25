@@ -17,7 +17,7 @@ class CommonUtility: NSObject {
         parentController.present(alert, animated: true, completion: nil)
     }
     
-   class func isValidEmail(_ emailId: String) -> ValidationResult {
+   class func isValidEmail(_ emailId: String) -> (Bool,String) {
         if(emailId.isEmpty) {
             return (false, "Email field should not be empty.")
         } else if !isValidEmailId(email : emailId){
